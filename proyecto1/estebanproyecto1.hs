@@ -15,9 +15,9 @@ esVocal n = (n=='a') || (n=='e') || (n=='i') || (n=='o') || (n== 'u')
 -- Ejercicio 2
 
 --a)
---paratodo :: [Bool] -> Bool -- comentado para el ejercicio 6
---paratodo []= True
---paratodo (x:xs) = (x==True) && paratodo xs
+paratodo :: [Bool] -> Bool
+paratodo []= True
+paratodo (x:xs) = (x==True) && paratodo xs
 
 --b)
 sumatoria :: [Int] -> Int
@@ -39,7 +39,7 @@ promedio :: [Int] -> Int
 promedio [] = 0
 promedio xs = div (sumatoria xs) (length xs)
 
---Ejercicio 3 programa la funcion pertenece :: Int -> [Int] -> Bool, que verifica si un numero se encuentra en una lista
+--Ejercicio 3
 pertenece :: Int -> [Int] -> Bool
 pertenece _ [] = False
 pertenece n (x:xs) = (x==n) || pertenece n xs
@@ -48,8 +48,7 @@ pertenece n (x:xs) = (x==n) || pertenece n xs
 encuentra :: Int ->[(Int, String)] -> String
 encuentra _ [] = ""
 encuentra n ((x,y):xs) | (n==x) = y
-                       | (n/=x) = encuentra n xs
-encuentra _ ((_, _) : _) = "" -- por warning de non exhaustive pattern
+                       | otherwise = encuentra n xs
 
 --Ejercicio 5
 --a)
@@ -75,17 +74,16 @@ productoria' [] _ = 1
 productoria' (x:xs) funcion = funcion x * productoria' xs funcion
 
 --Ejercicio 6
-paratodo :: [a] -> (a -> Bool) -> Bool
-paratodo (x:xs) funcion = paratodo' (x:xs) funcion
-paratodo [] _ = False -- por warning de non exhaustive pattern
+paratodo2 :: [a] -> (a -> Bool) -> Bool
+paratodo2 (x:xs) funcion = paratodo' (x:xs) funcion
+paratodo2 [] _ = False -- por warning de non exhaustive pattern
 
 --Ejercicio 7
 --a)
 esPar :: Int -> Bool
 esPar n = mod n 2 == 0
 todosPares :: [Int] -> Bool
-todosPares (x:xs) = paratodo' (x:xs) esPar 
-todosPares [] = False -- por warning de non exhaustive pattern
+todosPares xs = paratodo' xs esPar 
 
 --b)
 esMultiplo :: Int -> Int -> Bool
@@ -94,29 +92,22 @@ hayMultiplo :: Int -> [Int] -> Bool
 hayMultiplo i xs = existe' xs (esMultiplo i)
 
 --c)
-sumatoria'' :: [Int] -> Int -- ver lo de hacer con [a] -> Int, haciendo que solamente funcione con numeros poniendo Num [a]
-sumatoria'' [] = 0
-sumatoria'' (x:xs) = (x*x) + (sumatoria'' xs)
 sumaCuadrados :: Int -> Int
-sumaCuadrados n = sumatoria'' [0..n-1] 
+sumaCuadrados x | (x>=0) = sumatoria' [0..(x-1)] (\y->y*y) -- lambda funcion que utiliza su propio scope
+                | otherwise = error "El numero ingresado no puede ser negativo"
 
 --d)
-productoria'' :: [Int] -> Int -- ver lo de hacer con [a] -> Int,
-productoria'' [] = 1
-productoria'' (x:xs) = x * productoria xs
-factorial' :: Int -> Int 
-factorial' n = productoria'' [1..n]
+factorial' :: Int -> Int
+factorial' x = productoria' [1..x] (+0)
 
---e)multiplicaPares :: [Int] -> Int que calcula el producto de todos los n ́umeros pares de una lista.
+--e)
 tomarPares :: [Int] -> [Int]
 tomarPares [] = []
 tomarPares (x:xs) | (mod x 2) == 0 = x : tomarPares xs
-                  | (mod x 2) /= 0 = tomarPares xs
-tomarPares (_:_) = [] -- por warning de non exhaustive pattern
+                  | otherwise = tomarPares xs
 multiplicaPares :: [Int] -> Int
 multiplicaPares xs = productoria (tomarPares xs)
 
--- PREGUNTAR SOBRE LOS WARNINGS DE NON-EXHAUSTIVE
 
 --Ejercicio 8
 --a)
@@ -138,25 +129,20 @@ duplica [x] = [2*x]
 duplica (x:xs) = 2 * x : duplica xs
 
 --b)
-doble :: Int->Int
-doble x = 2 * x
 duplica' :: [Int] -> [Int]
-duplica' xs = map doble xs
+duplica' xs = map (2*) xs
 
 --Ejercicio 10
 --a) 
 buscaPares :: [Int] -> [Int]
 buscaPares [] = []
 buscaPares (x:xs) | mod x 2 == 0 = x : buscaPares xs
-                  | mod x 2 /= 0 = buscaPares xs
-buscaPares (_:_) = [] -- por warning de non exhaustive pattern
-
+                  | otherwise = buscaPares xs
 --b)
 buscaPares' :: [Int] -> [Int]
 buscaPares' xs = filter (esPar) xs
 
 --c)
--- Utilizando el filter para encontrar los pares y eso pasaría a ser parámetro de la función productoria para así retornar el producto de todos los números pares.
 multiplicaPares' :: [Int] -> Int
 multiplicaPares' xs = productoria (filter (esPar) xs)
 
@@ -167,13 +153,13 @@ sumarALista :: Num a => a -> [a] -> [a]
 sumarALista _ [] = []
 sumarALista n (x:xs) = (x+n) : sumarALista n xs
 
--- 2 que toma un valor de tipo a y lo introduce en la cabeza de cada lista del segundo par ́ametro 
-{--encabezar:: a -> [[a]] -> [[a]]
+-- 2
+encabezar :: a -> [[a]] -> [[a]]
 encabezar _ [] = []
-encabezar n ((x:xs):ys) = (n : (x : xs)) : encabezar n ys
-encabezar _ ([] : _) = [] --} -- ver que hacer con lo del vacío 
+encabezar e [[]] = [[e]]
+encabezar e (xs:ys) = ((e:xs):(encabezar e ys))
 
--- 3 -- ver warning que pasa
+-- 3
 mayoresA :: Ord a => a -> [a] -> [a]
 mayoresA _ [] = []
 mayoresA n (x:xs) | (x > n) = x: mayoresA n xs
@@ -182,22 +168,42 @@ mayoresA n (x:xs) | (x > n) = x: mayoresA n xs
 --b)
 -- 1
 sumarALista' :: Num a => a-> [a] -> [a]
-sumarALista' n xs = map (+n) xs -- ver warning defaulting consstraints to type 'Integer'
+sumarALista' n xs = map (+n) xs
 
 --2
-{--encabezar' :: a -> [[a]] -> [[a]]
-encabezar' n ((_:_):ys) = map (n:) ys--} -- ver como hace lo del vacio tambien, o para listas unitarias
+agregar :: a -> [a] -> [a]
+agregar n [] = [n]
+agregar n xs = n : xs
+encabezar' :: a -> [[a]] -> [[a]]
+encabezar' n ys = map (agregar n) ys
 
 --3
 mayoresA' :: Ord a => a-> [a] -> [a]
-mayoresA' n xs = filter (>n) xs   -- ver warning defaulting consstraints to type 'Integer'
+mayoresA' n xs = filter (>n) xs
 
 --Ejercicio 12
 
-{--encuentra' :: Int ->[(Int, String)] -> [(Int, String)]
-encuentra' n ((x,y):ys) = filter (x==n) y --}
+igualInt :: Int -> (Int, String) -> Bool
+igualInt x (a,_) = (x==a)
 
---Ejercicio 13 La funci ́on primIgualesA toma un valor y una lista, y calcula el tramo inicial m ́as largo de la lista cuyos elementos son iguales a ese valor
+sndHead :: [(Int, String)] -> String
+sndHead xs | xs == [] = ""
+           | otherwise = snd (head xs)
+
+encuentra' :: Int -> [(Int,String)] -> String
+encuentra' _ [] = ""
+encuentra' x xs = sndHead (filter (igualInt x ) xs)
+
+encuentra'' :: Int -> [(Int,String)] -> String
+encuentra'' x = sndHead . filter (igualInt x )
+
+--filter (igualInt x) :: [(Int,String)] -> [(Int,String)] 
+--sndHead :: [(Int, String)] -> String
+--sndHead . filter (igualInt x ) :: [(Int, String)] -> String
+
+comp :: (b -> c) -> (a -> b) -> (a -> c)
+comp g f a = g (f a)
+--Ejercicio 13
 --a)
 primIgualesA :: Eq a => a -> [a] -> [a]
 primIgualesA _ [] = []
@@ -211,8 +217,24 @@ primIgualesA' n xs = takeWhile (==n) xs
 
 --Ejercicio 14
 
+--a)
+primIguales :: Eq a => [a] -> [a]
+primIguales [] = []
+primIguales [x] = [x]
+primIguales (x : (y:xs)) | (x==y) = x : primIguales (y:xs)  
+                         | otherwise = [x]
+--b)
+primIguales' :: Eq a => [a] -> [a]
+primIguales' [] = []
+primIguales' (x:xs) = primIgualesA' x (x:xs)
 
-
+--Ejercicio 15
+--{minimo :: (Bounded a, Ord a) => [a] -> a
+--minimo [] = 0
+--minimo [x] = x
+--minimo (x:y:xs) | (x < y)  =  minimo (x:xs)
+--                | (x >= y)  = minimo (y:xs)
+--minimo (_:_:_) = error "comparacion erronea"
 
 
 
