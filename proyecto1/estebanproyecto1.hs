@@ -229,14 +229,131 @@ primIguales' [] = []
 primIguales' (x:xs) = primIgualesA' x (x:xs)
 
 --Ejercicio 15
---{minimo :: (Bounded a, Ord a) => [a] -> a
---minimo [] = 0
---minimo [x] = x
---minimo (x:y:xs) | (x < y)  =  minimo (x:xs)
---                | (x >= y)  = minimo (y:xs)
---minimo (_:_:_) = error "comparacion erronea"
+minimo :: (Bounded a, Ord a) => [a] -> a
+--b)
+minimo [] = minBound :: []
+--a)
+minimo [x] = x
+minimo (x:y:xs) | (x < y)  =  minimo (x:xs)
+                | (x >= y)  = minimo (y:xs)
+minimo (_:_:_) = error "comparacion erronea"
 
 
+--Ejercicio 16
+{--
+a)f :: (a, b) -> ...
+f x = 
+
+Respuesta: Está bien tipado, pues x puede ser una tupla y si cumple todos los casos de la definición.
+
+b)
+f :: (a, b) -> ...
+f (x , y) = ...
+
+Respuesta: Si está bien tipado, pues la variable 'x' es de tipo a y la variable 'y' es de tipo b
+
+c)
+f :: [(a, b)] -> ...
+f (a , b) = ...
+
+Respuesta: No se encuentra bien tipado, el parámetro que se le asigna es una tupla, mientras que la función requiere una lista de tuplas.
+
+d)
+f :: [(a, b)] -> ...
+f (x:xs) = ...
+
+Respuesta: Si bien 'x' puede hacer referencia a tuplas, esto no me asegura que x sea realmente una tupla, por lo tanto x puede tomar cualquier otro tipo de variable y esto podría fallar por ejemplo siendo x un entero, a su vez, no tiene en cuenta el caso de listas vacías.
+
+e)
+f :: [(a, b)] -> ...
+f ((x, y) : ((a, b) : xs)) = ...
+
+Respuesta: Bien tipado, pues se pasa con pattern-matching una lista de tuplas, pero no cubre el caso de listas vacías ni de un solo elemento, ahí solo es para listas de dos o más tuplas.
+
+f)
+f :: [(Int, a)] -> ...
+f [(0, a)] = ...
+
+Respuesta: Bien tipado, pero no cubre el caso de listas vacías.
+
+g)
+f :: [(Int, a)] -> ...
+f ((x, 1) : xs) = ...
+
+Respuesta: Dependiendo del valor que tome x está bien tipado, pero no cubre el caso de listas vacías, además en la parte de 1, para "ayudar" a especificar debería agregarse 1::Int
+
+h)
+f :: [(Int, a)] -> ...
+f ((1, x) : xs) = ...
+
+Respuesta: Bien tipado, pero no cubre el caso de listas vacías.
+
+i)
+f :: (Int -> Int) -> Int -> ...
+f a b = ...
+
+Respuesta: Bien tipado pues 'a' puede ser una función y b un entero, aunque si b no es entero, explota.
+
+j)
+f :: (Int -> Int) -> Int -> ...
+f a 3 = ...
+
+Respuesta: Bien tipado si 'a' es una función que va de Int -> Int, y 3 es un entero.
+
+k)
+f :: (Int -> Int) -> Int -> ...
+f 0 1 2 = ...
+
+Respuesta: Mal tipado, pues  se le están pasando más parámetros de los necesarios para la función. 
+
+l)
+f :: a -> (a -> a) -> ...
+f a g = ...
+
+Respuesta: Bien tipado, pues a puede ser cualquier tipo y g puede ser una función de tipo (a -> a)
+
+--} 
+
+-- Ejercicio 17
+
+{--
+a)
+f :: (a, b) -> a
+Respuesta: No es posible otra definición además de la listada abajo
+f (x,_) = x
+
+b)
+f :: (a, b) -> b
+Respuesta: No es posible otra definición además de la listada abajo
+f (_,b) = b
+
+c)
+f :: (a, b) -> c
+Respuesta: No es posible sin especificar los tipos, ya que no hay "operadores generales" que funcionen con variables de tipo general.
+
+d)
+f :: a -> b
+Respuesta: No puedo realizar una conversión de tipos generales, ahora lo que se podría hacer por ejemplo es realizar una división de números enteros que me asegure que me da un número con coma, y estaría cambiando de tipo... por ejemplo siendo a de tipo Integer a / (a+1) pero nuevamente, al tener tipos generales, no puedo utilizar estos operadores.
+
+e)
+f :: (a -> b) -> a -> b
+Respuesta: f funcionAux x = funcionAux x
+
+f)
+f :: (a -> b) -> [a] -> [b]
+
+g)
+f :: (a -> b) -> a -> c
+Respuesta: No puedo dar una definición que me cambie o mezcle los tipos, siendo éstos generales.
+
+
+h)
+f :: (a -> b) -> (b -> c) -> a -> c
+Respuesta: comp :: (b -> c) -> (a -> b) -> (a -> c)
+comp g f a = g (f a)
+
+
+--}
 
 
 
