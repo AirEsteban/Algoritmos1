@@ -84,15 +84,55 @@ estudia _ _ = error "Sólo los estudiantes pueden cursar carreras."  -- ver como
 
 -- Ejercicio 3
 --a)
-data Persona = Per String String Int Int Int Int Rol
+data Persona = Per String String Int Int Int Int Rol deriving (Eq,Show)
 --data Per1 = Per1 String String Int Int Int Int Rol
 
 --b)Por definiciones recursivas por ahí si se puede.
 
 --c) 
+--1 
 edad :: Persona -> (Int,Int,Int) -> Int
-edad Persona 
+edad (Per _ _ _ dia mes ano _) (d,m,a) = abs(div ((d-dia) + ((m-mes) * 30) + ((a-ano) * 365)) 365)
 
-        
+--2
+existe :: String -> [Persona] -> Bool
+existe _ [] = False
+existe apellido (Per ape _ _ _ _ _ _ : xs) = apellido == ape || existe apellido xs
+--existe "airasca" [Per "jeje" "petrone" 23 14 13 2012 (NoDocente Administrativa),Per "airasca" "esteban" 23 14 13 2012 (NoDocente Administrativa),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (NoDocente Administrativa)]
 
-             
+--3
+{--est_astronomia' :: [Persona] -> [Persona]
+est_astronomia' [] = []
+est_astronomia' ((Per nom ape doc d m a rol:xs))| rol == (Estudiante Astronomia _) = (Per nom ape doc d m a rol) : est_astronomia xs
+                                              | otherwise = est_astronomia xs--}
+--est_astronomia [Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017),Per "airasca" "esteban" 23 14 13 2012 (Estudiante Matematica 2015),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (Estudiante Astronomia 2017),Per "julio" "juli" 23 14 13 2012 Decano]
+
+soloAstro :: Persona -> Bool
+soloAstro (Per _ _ _ _ _ _ (Estudiante Astronomia _)) = True
+soloAstro _ = False 
+
+est_astronomia :: [Persona] -> [Persona]
+est_astronomia [] = []
+est_astronomia xs = filter (soloAstro) xs
+
+--4
+getDatosNoDocente :: Persona -> (String,Int)
+getDatosNoDocente (Per ape nom doc _ _ _ (NoDocente _)) = (ape ++ ", " ++ nom,doc)
+getDatosNoDocente (Per _ _ _ _ _ _ _) = ("",0)
+ 
+nodocente :: Persona -> Bool
+nodocente (Per _ _ _ _ _ _ (NoDocente _)) = True
+nodocente _ = False
+
+padron_nodocente :: [Persona] -> [(String, Int)]
+padron_nodocente [] = []
+padron_nodocente xs = map (getDatosNoDocente) (filter (nodocente) xs)
+
+--Ejercicio 4
+data Cola = Vacia | Encolada Persona Cola
+--a)
+--1
+atender :: Cola -> Cola
+atender Vacia = Vacia
+atender (Encolada _ cola) = atender cola
+
