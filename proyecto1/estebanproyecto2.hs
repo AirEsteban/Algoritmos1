@@ -129,10 +129,23 @@ padron_nodocente [] = []
 padron_nodocente xs = map (getDatosNoDocente) (filter (nodocente) xs)
 
 --Ejercicio 4
-data Cola = Vacia | Encolada Persona Cola
+data Cola = Vacia | Encolada Persona Cola deriving (Show,Eq)
 --a)
 --1
+-- atender (Encolada (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) (Encolada (Per "jej" "asd" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia))
 atender :: Cola -> Cola
 atender Vacia = Vacia
-atender (Encolada _ cola) = atender cola
+atender (Encolada _ cola) = cola
+
+--2
+-- encolar (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia
+-- encolar (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) (Encolada (Per "jasd" "ddd" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia)
+encolar :: Persona -> Cola -> Cola
+encolar persona Vacia = Encolada persona Vacia
+encolar (persona) cola = Encolada persona cola -- como hacerr para mandarlo a la ultima posicion...
+
+--3
+busca :: Cola -> Cargo -> Persona
+busca Vacia _ = error "que devolver?"
+busca Encolada cargo = 
 
