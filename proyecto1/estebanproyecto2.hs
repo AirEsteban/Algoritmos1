@@ -101,10 +101,6 @@ existe apellido (Per ape _ _ _ _ _ _ : xs) = apellido == ape || existe apellido 
 --existe "airasca" [Per "jeje" "petrone" 23 14 13 2012 (NoDocente Administrativa),Per "airasca" "esteban" 23 14 13 2012 (NoDocente Administrativa),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (NoDocente Administrativa)]
 
 --3
-{--est_astronomia' :: [Persona] -> [Persona]
-est_astronomia' [] = []
-est_astronomia' ((Per nom ape doc d m a rol:xs))| rol == (Estudiante Astronomia _) = (Per nom ape doc d m a rol) : est_astronomia xs
-                                              | otherwise = est_astronomia xs--}
 --est_astronomia [Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017),Per "airasca" "esteban" 23 14 13 2012 (Estudiante Matematica 2015),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (Estudiante Astronomia 2017),Per "julio" "juli" 23 14 13 2012 Decano]
 
 soloAstro :: Persona -> Bool
@@ -145,7 +141,127 @@ encolar persona Vacia = Encolada persona Vacia
 encolar (persona) cola = Encolada persona cola -- como hacerr para mandarlo a la ultima posicion...
 
 --3
+rolCargo ::  Cargo -> Persona -> Bool
+rolCargo Titular (Per _ _ _ _ _ _ (Docente Titular)) = True
+rolCargo Auxiliar (Per _ _ _ _ _ _ (Docente Auxiliar)) = True
+rolCargo Adjunto (Per _ _ _ _ _ _ (Docente Adjunto)) = True
+rolCargo Asociado (Per _ _ _ _ _ _ (Docente Asociado)) = True
+rolCargo Asistente (Per _ _ _ _ _ _ (Docente Asistente)) = True
+rolCargo _ (Per _ _ _ _ _ _ _) = False
+
+filtraCola :: (Persona -> Bool) -> Cola -> Cola
+filtraCola _ Vacia = Vacia
+filtraCola funcion (Encolada persona cola)  | funcion persona == True = Encolada persona (filtraCola funcion cola)
+                                            | otherwise = filtraCola funcion cola
+
+headCola :: Cola -> Persona -- no puedo usar Maybe pq estaria cambiando la funcion busca, (quedaría Maybe Persona)
+headCola Vacia = error ""  -- solo para cumplir con la pedido se hace asi.
+headCola (Encolada p _) = p
+
 busca :: Cola -> Cargo -> Persona
-busca Vacia _ = error "que devolver?"
-busca Encolada cargo = 
+busca cola cargo = headCola (filtraCola (rolCargo cargo) cola)
+
+--b El tipo Cola se parece a listas, podríamos usar listas de personas para resolver los problemas anteriores. [Persona]
+
+-- Ejercicio 5
+data ListaAsoc a b =  Vacia2 | Nodo a b (ListaAsoc a b) deriving (Show)
+
+type Diccionario = ListaAsoc String String
+type Padron = ListaAsoc Int String
+
+--1 a
+type GuiaTel = ListaAsoc (String,String) Int -- donde la tupla representa nombre completo y direccion y luego el telefono 
+
+--b 1
+la_long :: Integral c => ListaAsoc a b -> c
+la_long Vacia2 = 0
+la_long (Nodo _ _ (listaAsoc)) = 1 + la_long listaAsoc  
+-- la_long (Nodo 1 2 (Nodo 2 3 (Vacia2)))
+
+--b 2
+la_concat :: ListaAsoc a b -> ListaAsoc a b -> ListaAsoc a b
+la_concat Vacia2 ls1 = ls1
+la_concat (Nodo a b (ls1)) ls2 = (Nodo a b (la_concat ls1 ls2))
+
+--b 3
+la_pares :: ListaAsoc a b -> [(a, b)]
+la_pares Vacia2 = []
+la_pares (Nodo a b (la)) = (a,b) : la_pares la
+
+--b 4
+la_busca :: Eq a => ListaAsoc a b -> a -> Maybe b
+la_busca Vacia2 _ = Nothing
+la_busca (Nodo a b (la)) x | x == a = Just b
+                           | otherwise = la_busca la x
+
+--b 5
+la_aListaDePares :: ListaAsoc a b -> [(a,b)]
+la_aListaDePares Vacia2 = []
+la_aListaDePares (Nodo a b (la)) = (a,b) : la_aListaDePares la
+
+--b 6
+la_borrar :: Eq a =>a -> ListaAsoc a b -> ListaAsoc a b
+la_borrar _ Vacia2 = Vacia2
+la_borrar x (Nodo a b (la)) |x == a = la
+                            |otherwise = Nodo a b (la_borrar x (la))
+
+--c Respuesta: Se puede utilizar una lista de asociaciones para resolver el ejercicio "encuentra" del proyecto anterior
+
+--Ejercicio 6
+data Arbol a = Hoja | Rama (Arbol a) a (Arbol a)
+
+type Prefijos = Arbol String
+can , cana , canario , canas , cant , cantar , canto :: Prefijos
+can = Rama cana "can" cant
+cana = Rama canario "a" canas
+canario = Rama Hoja "rio" Hoja
+canas = Rama Hoja "s" Hoja
+cant = Rama cantar "t" canto
+cantar = Rama Hoja "ar" Hoja
+canto = Rama Hoja "o" Hoja
+
+--a
+a_long :: Integral b => Arbol a -> b
+a_long Hoja = 0
+a_long (Rama (izq) _ (der)) = 1 + a_long(izq) + a_long(der)
+
+--b
+a_hojas :: Integral b => Arbol a -> b
+a_hojas Hoja = 1
+a_hojas (Rama (izq) _ (der)) = a_hojas(izq) + a_hojas(der)
+
+--c
+a_inc :: Num a => Arbol a -> Arbol a
+a_inc Hoja = Hoja
+a_inc (Rama (izq) x (der)) = Rama (a_inc (izq)) (x+1) (a_inc (der))
+
+--d 
+a_nombre :: Arbol Persona -> Arbol String
+a_nombre Hoja = Hoja
+a_nombre (Rama (izq) (Per nom ape _ _ _ _ _) (der)) = Rama (a_nombre(izq)) (ape ++ ", " ++ nom) (a_nombre(der))
+
+--e
+a_map :: (a -> b) -> Arbol a -> Arbol b
+a_map _ Hoja = Hoja
+a_map func (Rama izq x der) = Rama (a_map func izq) (func x) (a_map func der)
+
+a_inc' :: Num a => Arbol a -> Arbol a
+a_inc' Hoja = Hoja
+a_inc' arbolito = a_map (+1) arbolito
+
+a_nombre' :: Arbol Persona -> Arbol String
+a_nombre' Hoja = Hoja
+a_nombre' rama = a_map(\(Per ape nom _ _ _ _ _) -> (ape ++ ", " ++ nom)) (rama)
+
+--f
+a_sum :: Num a => Arbol a -> a
+a_sum Hoja = 0
+a_sum (Rama (izq) x (der)) = x + a_sum(izq) + a_sum(der)
+
+--g
+a_prod :: Num a => Arbol a -> a
+a_prod Hoja = 1
+a_prod (Rama (izq) x (der)) = x * a_prod(izq) * a_prod(der)
+
+
 
