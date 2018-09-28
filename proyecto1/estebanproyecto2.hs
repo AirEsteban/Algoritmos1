@@ -64,11 +64,12 @@ cuantos_doc xs c = contDoc (soloDoc xs) c
 pruebaCuantosDoc :: [Rol]
 pruebaCuantosDoc = [Decano,Docente Adjunto, Docente Adjunto, Docente Auxiliar, Docente Asistente, Decano, Estudiante Computacion 2018, Decano, Docente Asistente, Docente Asociado,Docente Asociado, Docente Asociado]
 
---e) Se podria hacer con sinónimos de tipo, pero ¿Cómo?
+--e) Modificando el constructor de Decano, asignandole un parámetro de que lo represente. Por ej el parámetro Bool,
+-- siendo True para la mujer y False para el hombre (ésto previamente acordado) sino creando otro Nuevo tipo, llamado Genero con sus correspondientes constructores Hombre y Mujer.
 
 --f) Para representar un alumno que está inscripto en dos carreras podríamos hacer un sinónimo de 
--- tipo en el que la parte del constructor de carrera se pase una tupla con las dos carreras, en 
--- el constructor
+-- tipo en el que la parte del constructor de carrera se pase una tupla con las dos carreras o análogamente, una lista
+-- por si se quiere que tenga más de dos carreras.
 
 getCarrera :: Carrera -> Carrera
 getCarrera Matematica = Matematica
@@ -87,7 +88,7 @@ estudia _ _ = error "Sólo los estudiantes pueden cursar carreras."  -- ver como
 data Persona = Per String String Int Int Int Int Rol deriving (Eq,Show)
 --data Per1 = Per1 String String Int Int Int Int Rol
 
---b)Por definiciones recursivas por ahí si se puede.
+--b)No ya que Per es un constructor del Tipo Persona.
 
 --c) 
 --1 
@@ -98,10 +99,10 @@ edad (Per _ _ _ dia mes ano _) (d,m,a) = abs(div ((d-dia) + ((m-mes) * 30) + ((a
 existe :: String -> [Persona] -> Bool
 existe _ [] = False
 existe apellido (Per ape _ _ _ _ _ _ : xs) = apellido == ape || existe apellido xs
---existe "airasca" [Per "jeje" "petrone" 23 14 13 2012 (NoDocente Administrativa),Per "airasca" "esteban" 23 14 13 2012 (NoDocente Administrativa),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (NoDocente Administrativa)]
+--(Prueba) existe "airasca" [Per "jeje" "petrone" 23 14 13 2012 (NoDocente Administrativa),Per "airasca" "esteban" 23 14 13 2012 (NoDocente Administrativa),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (NoDocente Administrativa)]
 
 --3
---est_astronomia [Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017),Per "airasca" "esteban" 23 14 13 2012 (Estudiante Matematica 2015),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (Estudiante Astronomia 2017),Per "julio" "juli" 23 14 13 2012 Decano]
+--(Prueba) est_astronomia [Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017),Per "airasca" "esteban" 23 14 13 2012 (Estudiante Matematica 2015),Per "bon jovi" "jon" 23 14 13 2012 (NoDocente Administrativa) ,Per "quito" "esteban" 23 14 13 2012 (Estudiante Astronomia 2017),Per "julio" "juli" 23 14 13 2012 Decano]
 
 soloAstro :: Persona -> Bool
 soloAstro (Per _ _ _ _ _ _ (Estudiante Astronomia _)) = True
@@ -128,14 +129,14 @@ padron_nodocente xs = map (getDatosNoDocente) (filter (nodocente) xs)
 data Cola = Vacia | Encolada Persona Cola deriving (Show,Eq)
 --a)
 --1
--- atender (Encolada (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) (Encolada (Per "jej" "asd" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia))
+--(Prueba) atender (Encolada (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) (Encolada (Per "jej" "asd" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia))
 atender :: Cola -> Cola
 atender Vacia = Vacia
 atender (Encolada _ cola) = cola
 
 --2
--- encolar (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia
--- encolar (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) (Encolada (Per "jasd" "ddd" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia)
+--(Prueba)  encolar (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia
+--(Prueba)  encolar (Per "jeje" "petrone" 23 14 13 2012 (Estudiante Astronomia 2017)) (Encolada (Per "jasd" "ddd" 23 14 13 2012 (Estudiante Astronomia 2017)) Vacia)
 encolar :: Persona -> Cola -> Cola
 encolar persona Vacia = Encolada persona Vacia
 encolar (persona) cola = Encolada persona cola -- como hacerr para mandarlo a la ultima posicion...
