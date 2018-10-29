@@ -52,4 +52,23 @@ evalStep :: Statement -> State -> (State , Continuation)
 evalStep Skip state = (state,Finish)
 evalStep (AssignB (Var n _) expBool) (si,sb) = (si,(la_agregar n (evalBExpr expBool (si,sb))sb)),Finish)
 evalStep (AssignI (Var n _) expInt) (si,sb) = ((la_agregar n (evalIExpr expInt si) si,sb),Finish)
-evalStep (Seq statement1 statement2) state = evalStep statement1 state evalStep statement2 state
+evalStep (Seq statement1 statement2) state = case evalStep statement1 state of 
+                                             (state2,Finish) -> (state2,ToExec statement2)
+                                             (state2, ToExec stmnt1') -> (state2, ToExec (Seq stmnt1' statement2))
+-- Para la secuencia, evalua primero una de ellas y se fija que devuelve, si está terminada la primera entonces pasa a la 
+-- segunda si no la termino lo que hace es ejecutar nuevamente la sentencia con los pasos que faltan, una vez terminada
+-- lo que hace es pasar a la segunda.
+evalStep (If []) _ = error "mal"
+evalStep (If [(boolExpr,statement)]:xs) state | (evalBExpr boolExpr state) = (state,ToExec stmnt)
+                                              | not(evalBExpr boolExpr state) = (state, ToExec (If xs))
+                                              | otherwise = error "mal"
+-- Nos preguntamos si se cumple la expresion booleana, si se cumple, ejecutamos el statement, si no se cumple, pasamos
+-- a la siguiente guarda y asi siguiendo
+evalStep (Do boolExpr statement) state | (evalBExpr boolExpr state) = (state, ToExec (Seq statement (Do boolExpr statement))
+                                       | not (evalBExpro boolExpr state) = (state,Finish)
+                                       | otherwise error "mal"
+-- En el do, nos fijamos si se cumple la guarda, si es así, lo que se hace es ejecutar el "cuerpo" del ciclo, si no
+-- se cumple, entonces debemos salir del ciclo y finalizar su ejecución.
+
+
+
